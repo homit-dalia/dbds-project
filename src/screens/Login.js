@@ -15,7 +15,7 @@ const Login = () => {
     const handleLogin = async () => {
         console.log('Username:', username);
         console.log('Password:', password);
-        // Construct the request payload
+
         const requestBody = {
             email: username,
             password: password,
@@ -75,7 +75,7 @@ const Login = () => {
                         required
                         fullWidth
                         id="username"
-                        label="Username"
+                        label="Email"
                         name="username"
                         autoComplete="username"
                         autoFocus
@@ -96,7 +96,7 @@ const Login = () => {
                     />
 
                     {showInvalidCredentials && (
-                        <Typography color="error">
+                        <Typography color="error" maxWidth="md">
                             Invalid username or password
                         </Typography>
                     )}
