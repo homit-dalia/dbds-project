@@ -3,11 +3,13 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Container, Typography, Box, Button } from '@mui/material';
+import { useUserContext } from '../App';
 
 const UserProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = location.state || {};
+  
+  const {user, setUser} = useUserContext();
 
   if (!user) {
     return (
@@ -29,7 +31,9 @@ const UserProfile = () => {
 
   const handleLogout = () => {
     // Navigate back to the login screen
+    setUser({ loggedIn: false, info: {} });
     navigate('/');
+
   };
 
   return (
@@ -42,13 +46,13 @@ const UserProfile = () => {
         minHeight="100vh"
       >
         <Typography variant="h4" component="h1" gutterBottom>
-          Welcome, {user.firstname}!
+          Welcome, {user.info.firstname}!
         </Typography>
-        <Typography variant="h6">Email: {user.email}</Typography>
-        <Typography variant="h6">First Name: {user.firstname}</Typography>
-        <Typography variant="h6">Last Name: {user.lastname}</Typography>
+        <Typography variant="h6">Email: {user.info.email}</Typography>
+        <Typography variant="h6">First Name: {user.info.firstname}</Typography>
+        <Typography variant="h6">Last Name: {user.info.lastname}</Typography>
         <Typography variant="h6">
-          Username: {user.username ? user.username : 'N/A'}
+          Username: {user.info.username ? user.info.username : 'N/A'}
         </Typography>
         <Button
           variant="contained"

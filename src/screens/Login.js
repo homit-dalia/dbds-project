@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Container } from '@mui/material';
 import { apiEndpoints } from '../constants';
 import { useNavigate } from 'react-router-dom';
+import { useUserContext } from '../App';
 
 const Login = () => {
 
     const navigate = useNavigate();
+    const { user, setUser } = useUserContext();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -34,7 +36,7 @@ const Login = () => {
 
             if (data.success) {
                 setShowInvalidCredentials(false);
-                navigate('/profile', { state: { user: data.user } });
+                setUser({ loggedIn: true, info: data.user });
             }
             else {
                 setShowInvalidCredentials(true);
@@ -49,6 +51,7 @@ const Login = () => {
     // all wrappers functions go here
     const handleOnChangeUsername = (e) => setUsername(e.target.value);
     const handleOnChangePassword = (e) => setPassword(e.target.value);
+    const handleOnPressSignup = () => navigate('/signup');
 
     return (
         <Container maxWidth="md">
@@ -110,6 +113,16 @@ const Login = () => {
                     >
                         Login
                     </Button>
+
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        color="secondary"
+                        onClick={handleOnPressSignup}
+                    >
+                        Signup
+                    </Button>
+
                 </Box>
             </Box>
         </Container>
