@@ -5,6 +5,7 @@ import Home from './screens/Home';
 import Signup from './screens/Signup';
 import Header from './components/Header';
 import SearchTrains from './screens/SearchTrains';
+import Reservations from './screens/Reservation';
 
 
 const UserContext = createContext();
@@ -22,7 +23,7 @@ function App() {
             <Header />
             <Routes>
               <Route path="/search-trains" element={<SearchTrains />} />
-              <Route path="/my-reservations" element={<div>My Reservations Page</div>} />
+              <Route path="/my-reservations" element={<Reservations />} />
               <Route path="/profile" element={<Home />} />
               <Route path="*" element={<Navigate to="/profile" />} />
             </Routes>

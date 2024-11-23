@@ -1,9 +1,29 @@
 import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box, Select, MenuItem, IconButton, Collapse } from '@mui/material';
+import {
+    TextField,
+    Button,
+    Container,
+    Typography,
+    Box,
+    Select,
+    MenuItem,
+    IconButton,
+    Collapse,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    InputLabel,
+} from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { apiEndpoints } from '../constants';
+import { useUserContext } from '../App';
 
 const SearchTrains = () => {
+
+    const { user } = useUserContext();
+
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
     const [dateOfTravel, setDateOfTravel] = useState('');
@@ -11,6 +31,9 @@ const SearchTrains = () => {
     const [trainSchedules, setTrainSchedules] = useState([]);
     const [stops, setStops] = useState({});
     const [expandedSchedule, setExpandedSchedule] = useState(null);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedSchedule, setSelectedSchedule] = useState(null);
+    const [passengerCategory, setPassengerCategory] = useState('regular');
 
     const handleSearch = async () => {
         const requestBody = { source: origin, destination: destination, date: dateOfTravel };
@@ -31,7 +54,7 @@ const SearchTrains = () => {
         setSortCriteria(criteria);
         const sortedSchedules = [...trainSchedules].sort((a, b) => {
             if (criteria === 'arrival') return new Date(a.arrival) - new Date(b.arrival);
-            if (criteria === 'departure') return new Date(b.departure) - new Date(a.departure);
+            if (criteria === 'departure') return new Date(a.departure) - new Date(b.departure);
             if (criteria === 'fare') return a.fare - b.fare;
             return 0;
         });
@@ -59,11 +82,50 @@ const SearchTrains = () => {
         }
     };
 
+    const handleReserveTicket = async () => {
+        if (!selectedSchedule) return;
+        console.log("Inside handleReserveTicket");
+        try {
+            const requestBody = {
+                transit_line: selectedSchedule.transit_line,
+                customer_email: user.info.email,
+                price: selectedSchedule.fare,
+                passenger_category: passengerCategory,
+            };
+            const response = await fetch(apiEndpoints.reserveTicket, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody),
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('Ticket reserved successfully!');
+                handleCloseModal();
+            } else {
+                alert('Failed to reserve ticket. Please try again later.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+
+    const handleOpenModal = (schedule) => {
+        setSelectedSchedule(schedule);
+        setModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setModalOpen(false);
+        setSelectedSchedule(null);
+        setPassengerCategory('regular');
+    };
+
     return (
         <Container>
             <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
                 <Typography variant="h4" gutterBottom>Search Trains</Typography>
-                
+
                 {/* Search Section */}
                 <Box display="flex" alignItems="center" gap={2} mb={4} sx={{ flexWrap: 'wrap' }}>
                     <TextField
@@ -163,7 +225,13 @@ const SearchTrains = () => {
                                     </Box>
                                 </Collapse>
                                 <Box mt={2} display="flex" justifyContent="flex-end">
-                                    <Button variant="contained" color="secondary">Buy</Button>
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        onClick={handleOpenModal.bind(null, schedule)}
+                                    >
+                                        Buy
+                                    </Button>
                                 </Box>
                             </Box>
                         ))}
@@ -172,6 +240,40 @@ const SearchTrains = () => {
                     <Typography>No train schedules found.</Typography>
                 )}
             </Box>
+
+            <Dialog
+                open={modalOpen}
+                onClose={handleCloseModal}
+                maxWidth="sm"  // Change this value for wider modal ('xs', 'sm', 'md', 'lg', 'xl')
+                fullWidth // Ensures the modal stretches to the specified maxWidth
+            >
+                <DialogTitle>Reserve Ticket</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Fare: $
+                        {passengerCategory !== "regular"
+                            ? (selectedSchedule?.fare * 0.9).toFixed(2) // Apply 10% discount and format to 2 decimal places
+                            : selectedSchedule?.fare}
+                    </Typography>
+                    <FormControl fullWidth sx={{ mt: 3 }}>
+                        <InputLabel>Passenger Category</InputLabel>
+                        <Select
+                            value={passengerCategory}
+                            onChange={(e) => setPassengerCategory(e.target.value)}
+                        >
+                            <MenuItem value="regular">Regular</MenuItem>
+                            <MenuItem value="child">Child</MenuItem>
+                            <MenuItem value="elderly">Elderly</MenuItem>
+                            <MenuItem value="disabled">Disabled</MenuItem>
+                        </Select>
+                    </FormControl>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseModal} color="secondary">Cancel</Button>
+                    <Button onClick={handleReserveTicket} color="primary">Reserve</Button>
+                </DialogActions>
+            </Dialog>
+
         </Container>
     );
 };

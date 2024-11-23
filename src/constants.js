@@ -5,4 +5,7 @@ export const apiEndpoints = {
     register: apiServer + '/customer/register',
     trainSchedule: apiServer + '/train/fetch/schedule',
     trainStops: apiServer + '/train/fetch/stops',
+    reserveTicket: apiServer + '/train/reserve',
+    fetchReservations: apiServer + '/train/fetch/reservations',
+    cancelReservation: apiServer + '/train/reserve/cancel',
 };
