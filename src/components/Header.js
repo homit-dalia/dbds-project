@@ -1,46 +1,59 @@
-// src/components/Header.js
-
 import React from 'react';
-import { AppBar, Toolbar, Typography, Tabs, Tab, Box, IconButton } from '@mui/material';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import SearchIcon from '@mui/icons-material/Search';
-import TrainIcon from '@mui/icons-material/Train';
+import { AppBar, Tabs, Tab, Toolbar, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useUserContext } from '../App';
 
 const Header = () => {
+  const { user } = useUserContext();
   const navigate = useNavigate();
 
-  const handleTabChange = (event, newValue) => {
-    if (newValue === 0) {
-      navigate('/search-trains');
-    } else if (newValue === 1) {
-      navigate('/my-reservations');
+  // Determine which tabs to show based on user type
+  const getTabs = () => {
+    if (user.isEmployee) {
+      if (user.info.type === 'admin') {
+        return [
+          { label: 'Manage Representatives', path: '/admin/manage-representatives' },
+          { label: 'Statistics', path: '/admin/statistics' },
+          { label: 'Profile', path: '/profile' },
+        ];
+      } else if (user.info.type === 'customer_rep') {
+        return [
+          { label: 'Train Schedules', path: '/customer-rep/train-schedules' },
+          { label: 'Queries', path: '/customer-rep/queries' },
+          { label: 'Profile', path: '/profile' },
+        ];
+      }
     }
+    // Default for regular users
+    return [
+      { label: 'Search Trains', path: '/search-trains' },
+      { label: 'My Reservations', path: '/my-reservations' },
+      { label: 'Profile', path: '/profile' },
+    ];
   };
 
+  const tabs = getTabs();
+
   return (
-    <AppBar position="sticky">
+    <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Reservation System
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          Railway Reservation System
         </Typography>
-        <Tabs value={false} onChange={handleTabChange} textColor="inherit">
-          <Tab 
-            label="Search Trains"
-            icon={<SearchIcon />}
-            sx={{ '&:hover': { color: '#FFA500', transform: 'scale(1.05)' } }}
-          />
-          <Tab 
-            label="My Reservations"
-            icon={<TrainIcon />}
-            sx={{ '&:hover': { color: '#FFA500', transform: 'scale(1.05)' } }}
-          />
+        <Tabs
+          value={false} // No controlled state for the active tab
+          textColor="inherit"
+          indicatorColor="secondary"
+        >
+          {tabs.map((tab, index) => (
+            <Tab
+              key={index}
+              label={tab.label}
+              onClick={() => navigate(tab.path)}
+              sx={{ minWidth: 120 }}
+            />
+          ))}
         </Tabs>
-        <Box sx={{ flexGrow: 0 }}>
-          <IconButton color="inherit" sx={{ '&:hover': { color: '#FFA500', transform: 'scale(1.1)' } }}>
-            <AccountCircleIcon />
-          </IconButton>
-        </Box>
       </Toolbar>
     </AppBar>
   );

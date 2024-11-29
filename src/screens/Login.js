@@ -1,22 +1,54 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box, Typography, Container } from '@mui/material';
+import { TextField, Button, Box, Typography, Container, FormControlLabel, Switch } from '@mui/material';
 import { apiEndpoints } from '../constants';
 import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../App';
 
 const Login = () => {
-
     const navigate = useNavigate();
     const { user, setUser } = useUserContext();
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-
+    const [isEmployee, setIsEmployee] = useState(false); // Toggle switch state
     const [showInvalidCredentials, setShowInvalidCredentials] = useState(false);
 
     const handleLogin = async () => {
         console.log('Username:', username);
         console.log('Password:', password);
+        console.log('Login Type:', isEmployee ? 'Employee' : 'Customer');
+
+        if (isEmployee) {
+            // Employee login
+            const requestBody = {
+                email: username,
+                password: password,
+            };
+
+            try {
+                const response = await fetch(apiEndpoints.employeeLogin, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    setShowInvalidCredentials(false);
+                    setUser({ loggedIn: true, info: data.user, isEmployee: true });
+                } else {
+                    setShowInvalidCredentials(true);
+                }
+                console.log('Data:', data);
+            } catch (error) {
+                console.error('Error:', error);
+                setShowInvalidCredentials(true);
+            }
+            return;
+        }
 
         const requestBody = {
             email: username,
@@ -36,9 +68,8 @@ const Login = () => {
 
             if (data.success) {
                 setShowInvalidCredentials(false);
-                setUser({ loggedIn: true, info: data.user });
-            }
-            else {
+                setUser({ loggedIn: true, info: data.user, isEmployee: false });
+            } else {
                 setShowInvalidCredentials(true);
             }
             console.log('Data:', data);
@@ -48,10 +79,11 @@ const Login = () => {
         }
     };
 
-    // all wrappers functions go here
+    // Wrapper functions
     const handleOnChangeUsername = (e) => setUsername(e.target.value);
     const handleOnChangePassword = (e) => setPassword(e.target.value);
     const handleOnPressSignup = () => navigate('/signup');
+    const handleToggleEmployee = () => setIsEmployee((prev) => !prev); // Toggle switch handler
 
     return (
         <Container maxWidth="md">
@@ -104,6 +136,17 @@ const Login = () => {
                         </Typography>
                     )}
 
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={isEmployee}
+                                onChange={handleToggleEmployee}
+                                color="primary"
+                            />
+                        }
+                        label="Employee Login"
+                    />
+
                     <Button
                         type="submit"
                         fullWidth
@@ -122,7 +165,6 @@ const Login = () => {
                     >
                         Signup
                     </Button>
-
                 </Box>
             </Box>
         </Container>

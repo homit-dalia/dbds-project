@@ -31,7 +31,7 @@ const UserProfile = () => {
 
   const handleLogout = () => {
     // Navigate back to the login screen
-    setUser({ loggedIn: false, info: {} });
+    setUser({ loggedIn: false, info: {}, isEmployee: false });
     navigate('/');
 
   };
@@ -53,6 +53,9 @@ const UserProfile = () => {
         <Typography variant="h6">Last Name: {user.info.lastname}</Typography>
         <Typography variant="h6">
           Username: {user.info.username ? user.info.username : 'N/A'}
+        </Typography>
+        <Typography variant="h6">
+          Role: {user.isEmployee ? 'Employee' : 'Customer'} {user.info.type ?? ""}
         </Typography>
         <Button
           variant="contained"

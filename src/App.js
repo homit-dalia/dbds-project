@@ -6,14 +6,16 @@ import Signup from './screens/Signup';
 import Header from './components/Header';
 import SearchTrains from './screens/SearchTrains';
 import Reservations from './screens/Reservation';
-
+import CustomerRep from './screens/CustomerRep';
+import ManageRepresentatives from './screens/ManageRepresentatives';
+import Statistics from './screens/Statistics';
 
 const UserContext = createContext();
 
 export const useUserContext = () => useContext(UserContext);
 
 function App() {
-  const [user, setUser] = useState({ loggedIn: false, info: {} });
+  const [user, setUser] = useState({ loggedIn: false, info: {}, isEmployee: false });
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
@@ -22,13 +24,45 @@ function App() {
           <>
             <Header />
             <Routes>
-              <Route path="/search-trains" element={<SearchTrains />} />
-              <Route path="/my-reservations" element={<Reservations />} />
-              <Route path="/profile" element={<Home />} />
-              <Route path="*" element={<Navigate to="/profile" />} />
+              {/* Employee Routes */}
+              {user.isEmployee ? (
+                user.info.type === 'admin' ? (
+                  <>
+                    <Route path="/profile" element={<Home />} />
+                    <Route path="/admin/manage-representatives" element={<ManageRepresentatives />} />
+                    <Route path="/admin/statistics" element={<Statistics />} />
+                    <Route path="*" element={<Navigate to="/profile" />} />
+                  </>
+                ) : (
+                  <>
+                    <Route path="/profile" element={<Home />} />
+                    <Route path="/customer-rep" element={<CustomerRep />} />
+                  </>
+                )
+              ) : (
+                // Regular User Routes
+                <>
+                  <Route path="/search-trains" element={<SearchTrains />} />
+                  <Route path="/my-reservations" element={<Reservations />} />
+                  <Route path="/profile" element={<Home />} />
+                  <Route path="*" element={<Navigate to="/profile" />} />
+                </>
+              )}
+
+              {/* Redirect to appropriate pages */}
+              {user.isEmployee && user.info.type === 'admin' && (
+                <>
+                  <Route path="/admin/manage-representatives" element={<Navigate to="/admin/manage-representatives" />} />
+                  <Route path="/admin/statistics" element={<Navigate to="/admin/statistics" />} />
+                </>
+              )}
+              {user.isEmployee && user.info.type === 'customer_rep' && (
+                <Route path="*" element={<Navigate to="/customer-rep" />} />
+              )}
             </Routes>
           </>
         ) : (
+          // Public Routes
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
