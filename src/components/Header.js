@@ -28,6 +28,7 @@ const Header = () => {
     return [
       { label: 'Search Trains', path: '/search-trains' },
       { label: 'My Reservations', path: '/my-reservations' },
+      { label: 'Support', path: '/support' },
       { label: 'Profile', path: '/profile' },
     ];
   };

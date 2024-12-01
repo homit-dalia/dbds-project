@@ -251,10 +251,27 @@ const SearchTrains = () => {
                 <DialogContent>
                     <Typography>
                         Fare: $
-                        {passengerCategory !== "regular"
-                            ? (selectedSchedule?.fare * 0.9).toFixed(2) // Apply 10% discount and format to 2 decimal places
-                            : selectedSchedule?.fare}
+                        {selectedSchedule?.fare &&
+                            (() => {
+                                const baseFare = selectedSchedule.fare;
+                                const discountRates = {
+                                    child: 0.25,    // 25% discount
+                                    elderly: 0.35,  // 35% discount
+                                    disabled: 0.50, // 50% discount
+                                    regular: 0.0    // No discount
+                                };
+
+                                // Determine the discount rate for the selected passenger category
+                                const discountRate = discountRates[passengerCategory] || 0.0;
+
+                                // Calculate discounted fare
+                                const discountedFare = baseFare * (1 - discountRate);
+
+                                // Format the fare to 2 decimal places
+                                return discountedFare.toFixed(2);
+                            })()}
                     </Typography>
+
                     <FormControl fullWidth sx={{ mt: 3 }}>
                         <InputLabel>Passenger Category</InputLabel>
                         <Select
@@ -262,9 +279,9 @@ const SearchTrains = () => {
                             onChange={(e) => setPassengerCategory(e.target.value)}
                         >
                             <MenuItem value="regular">Regular</MenuItem>
-                            <MenuItem value="child">Child</MenuItem>
-                            <MenuItem value="elderly">Elderly</MenuItem>
-                            <MenuItem value="disabled">Disabled</MenuItem>
+                            <MenuItem value="child">Child - 25% discount</MenuItem>
+                            <MenuItem value="elderly">Elderly - 35% discount</MenuItem>
+                            <MenuItem value="disabled">Disabled - 50% discount</MenuItem>
                         </Select>
                     </FormControl>
                 </DialogContent>

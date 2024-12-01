@@ -65,7 +65,7 @@ const SearchReservations = () => {
             }
         } catch (error) {
             console.error('Error fetching revenue data:', error);
-            alert('Failed to fetch revenue data. Please try again.');
+            // alert('Failed to fetch revenue data. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -111,7 +111,9 @@ const SearchReservations = () => {
             const response = await fetch(apiEndpoints.getMetadata, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({}),
+                body: JSON.stringify({
+                    temp: "",
+                }),
             });
             const data = await response.json();
             if (data.success) {

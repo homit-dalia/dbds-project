@@ -27,13 +27,29 @@ const ManageRepresentatives = () => {
   const [isCreating, setIsCreating] = useState(false); // Determines if creating or editing
   const [isError, setIsError] = useState(false);
 
+  useEffect(() => {
+    fetchRepresentatives();
+
+    // Attach the event listener
+    window.addEventListener('focus', fetchRepresentatives);
+
+    // Cleanup the event listener on unmount
+    return () => {
+      window.removeEventListener('focus', fetchRepresentatives);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsError(false);
+  }, [selectedRep]);
+
   // Fetch all representatives
   const fetchRepresentatives = async () => {
     try {
       const response = await fetch(apiEndpoints.fetchReps, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ test: "hello", }),
       });
       const data = await response.json();
       if (data.success) {
@@ -43,14 +59,6 @@ const ManageRepresentatives = () => {
       console.error('Error fetching representatives:', error);
     }
   };
-
-  useEffect(() => {
-    fetchRepresentatives();
-  }, []);
-
-  useEffect(() => {
-    setIsError(false);
-  }, [selectedRep]);
 
   // Open modal for editing a representative
   const handleEdit = (rep) => {

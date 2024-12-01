@@ -17,4 +17,10 @@ export const apiEndpoints = {
     searchReservations: apiServer + '/employee/search/reservations',
     calculateRevenue: apiServer + '/employee/revenue',
     getMetadata: apiServer + '/employee/metadata',
+    getTrainsForStation: apiServer + "/employee/station/trains",
+    getCustomersForTransit: apiServer + "/employee/transit/customers",
+    updateTrainSchedule: apiServer + "/employee/update/trains",
+    getQueries: apiServer + "/employee/fetch/queries",
+    answerQuery: apiServer + "/employee/answer/queries",
+    createQuery: apiServer + "/employee/create/queries",
 };

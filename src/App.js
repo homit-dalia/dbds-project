@@ -6,9 +6,10 @@ import Signup from './screens/Signup';
 import Header from './components/Header';
 import SearchTrains from './screens/SearchTrains';
 import Reservations from './screens/Reservation';
-import CustomerRep from './screens/CustomerRep';
 import ManageRepresentatives from './screens/ManageRepresentatives';
 import Statistics from './screens/Statistics';
+import TrainSchedules from './screens/TrainSchedules';
+import Queries from './screens/Queries';
 
 const UserContext = createContext();
 
@@ -36,7 +37,9 @@ function App() {
                 ) : (
                   <>
                     <Route path="/profile" element={<Home />} />
-                    <Route path="/customer-rep" element={<CustomerRep />} />
+                    <Route path="/customer-rep/train-schedules" element={<TrainSchedules />} />
+                    <Route path="/customer-rep/queries" element={<Queries />} />
+                    <Route path="*" element={<Navigate to="/profile" />} />
                   </>
                 )
               ) : (
@@ -45,6 +48,7 @@ function App() {
                   <Route path="/search-trains" element={<SearchTrains />} />
                   <Route path="/my-reservations" element={<Reservations />} />
                   <Route path="/profile" element={<Home />} />
+                  <Route path="/support" element={<Queries />} />
                   <Route path="*" element={<Navigate to="/profile" />} />
                 </>
               )}
