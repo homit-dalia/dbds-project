@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     TextField,
     Button,
@@ -34,6 +34,12 @@ const SearchTrains = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedSchedule, setSelectedSchedule] = useState(null);
     const [passengerCategory, setPassengerCategory] = useState('regular');
+    const [isRoundTripBooking, setIsRoundTripBooking] = useState(false);
+
+    useEffect(() => {
+        if (origin && destination)
+            handleSearch();
+    }, [origin, destination, dateOfTravel]);
 
     const handleSearch = async () => {
         const requestBody = { source: origin, destination: destination, date: dateOfTravel };
@@ -45,6 +51,7 @@ const SearchTrains = () => {
             });
             const data = await response.json();
             setTrainSchedules(data.success ? data.schedules : []);
+            console.log(data.schedules);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -55,7 +62,7 @@ const SearchTrains = () => {
         const sortedSchedules = [...trainSchedules].sort((a, b) => {
             if (criteria === 'arrival') return new Date(a.arrival) - new Date(b.arrival);
             if (criteria === 'departure') return new Date(a.departure) - new Date(b.departure);
-            if (criteria === 'fare') return a.fare - b.fare;
+            if (criteria === 'fare') return a.final_fare - b.final_fare;
             return 0;
         });
         setTrainSchedules(sortedSchedules);
@@ -89,7 +96,7 @@ const SearchTrains = () => {
             const requestBody = {
                 transit_line: selectedSchedule.transit_line,
                 customer_email: user.info.email,
-                price: selectedSchedule.fare,
+                price: selectedSchedule.final_fare,
                 passenger_category: passengerCategory,
             };
             const response = await fetch(apiEndpoints.reserveTicket, {
@@ -99,8 +106,22 @@ const SearchTrains = () => {
             });
             const data = await response.json();
             if (data.success) {
-                alert('Ticket reserved successfully!');
+                // Ask the user to book round trip ticket
                 handleCloseModal();
+                if (!isRoundTripBooking) {
+                    const roundTrip = window.confirm('Do you want to book a round trip ticket as well?');
+                    if (roundTrip) {
+                        // Reserve the return ticket
+                        handleSwapLocations();
+                        setIsRoundTripBooking(true);
+                        return;
+                    }
+                    alert('Ticket reserved successfully!');
+                }
+                else {
+                    alert('Ticket reserved successfully!');
+                    setIsRoundTripBooking(false);
+                }
             } else {
                 alert('Failed to reserve ticket. Please try again later.');
             }
@@ -181,7 +202,7 @@ const SearchTrains = () => {
                                         {schedule.origin_name} to {schedule.destination_name}
                                     </Typography>
                                     <Typography variant="h6" color="secondary">
-                                        Fare: ${schedule.fare}
+                                        Fare: ${schedule.final_fare}
                                     </Typography>
                                 </Box>
                                 <Box display="flex" justifyContent="space-between" mt={2}>
@@ -200,29 +221,33 @@ const SearchTrains = () => {
                                     View Stops
                                 </Button>
                                 <Collapse in={expandedSchedule === schedule.transit_line} timeout="auto" unmountOnExit>
-                                    <Box mt={4} display="flex" alignItems="center" width="100%" position="relative">
-                                        <Box position="absolute" top="50%" left={0} right={0} height={2} bgcolor="grey.300" />
-                                        <Box position="relative" zIndex={1} textAlign="center" flexShrink={0} display="flex" flexDirection="column" alignItems="center">
-                                            <Box width={24} height={24} borderRadius="50%" bgcolor="success.main" display="flex" alignItems="center" justifyContent="center" position="relative" top="-12px">
-                                                <Typography variant="caption" color="white">S</Typography>
+                                    {stops[schedule.transit_line]?.length > 0 ?
+                                        <Box mt={4} display="flex" alignItems="center" width="100%" position="relative">
+                                            <Box position="absolute" top="50%" left={0} right={0} height={2} bgcolor="grey.300" />
+                                            <Box position="relative" zIndex={1} textAlign="center" flexShrink={0} display="flex" flexDirection="column" alignItems="center">
+                                                <Box width={24} height={24} borderRadius="50%" bgcolor="success.main" display="flex" alignItems="center" justifyContent="center" position="relative" top="-12px">
+                                                    <Typography variant="caption" color="white">S</Typography>
+                                                </Box>
+                                                <Typography variant="caption" mt={1}>{schedule.origin_name}</Typography>
                                             </Box>
-                                            <Typography variant="caption" mt={1}>Source</Typography>
+                                            {stops[schedule.transit_line]?.map((stop, index) => (
+                                                <Box key={index} textAlign="center" flexGrow={1} position="relative" mx={2} display="flex" flexDirection="column" alignItems="center">
+                                                    <Box width={10} height={10} borderRadius="50%" bgcolor="primary.main" position="relative" zIndex={1} top="-12px" mb={1} />
+                                                    <Typography variant="caption">{stop.station_name}</Typography>
+                                                    <Typography variant="caption" color="textSecondary">Arrival: {new Date(stop.arrival).toLocaleTimeString()}</Typography>
+                                                    <Typography variant="caption" color="textSecondary">Duration: {Math.ceil((new Date(stop.departure) - new Date(stop.arrival)) / 60000)} min</Typography>
+                                                </Box>
+                                            ))}
+                                            <Box position="relative" zIndex={1} textAlign="center" flexShrink={0} display="flex" flexDirection="column" alignItems="center">
+                                                <Box width={24} height={24} borderRadius="50%" bgcolor="error.main" display="flex" alignItems="center" justifyContent="center" position="relative" top="-12px">
+                                                    <Typography variant="caption" color="white">D</Typography>
+                                                </Box>
+                                                <Typography variant="caption" mt={1}>{schedule.destination_name}</Typography>
+                                            </Box>
                                         </Box>
-                                        {stops[schedule.transit_line]?.map((stop, index) => (
-                                            <Box key={index} textAlign="center" flexGrow={1} position="relative" mx={2} display="flex" flexDirection="column" alignItems="center">
-                                                <Box width={10} height={10} borderRadius="50%" bgcolor="primary.main" position="relative" zIndex={1} top="-12px" mb={1} />
-                                                <Typography variant="caption">{stop.station_name}</Typography>
-                                                <Typography variant="caption" color="textSecondary">Arrival: {new Date(stop.arrival).toLocaleTimeString()}</Typography>
-                                                <Typography variant="caption" color="textSecondary">Duration: {Math.ceil((new Date(stop.departure) - new Date(stop.arrival)) / 60000)} min</Typography>
-                                            </Box>
-                                        ))}
-                                        <Box position="relative" zIndex={1} textAlign="center" flexShrink={0} display="flex" flexDirection="column" alignItems="center">
-                                            <Box width={24} height={24} borderRadius="50%" bgcolor="error.main" display="flex" alignItems="center" justifyContent="center" position="relative" top="-12px">
-                                                <Typography variant="caption" color="white">D</Typography>
-                                            </Box>
-                                            <Typography variant="caption" mt={1}>Destination</Typography>
-                                        </Box>
-                                    </Box>
+
+                                        : <Typography variant="body2" mt={2}>No stops found.</Typography>
+                                    }
                                 </Collapse>
                                 <Box mt={2} display="flex" justifyContent="flex-end">
                                     <Button
@@ -253,7 +278,7 @@ const SearchTrains = () => {
                         Fare: $
                         {selectedSchedule?.fare &&
                             (() => {
-                                const baseFare = selectedSchedule.fare;
+                                const baseFare = selectedSchedule.final_fare;
                                 const discountRates = {
                                     child: 0.25,    // 25% discount
                                     elderly: 0.35,  // 35% discount

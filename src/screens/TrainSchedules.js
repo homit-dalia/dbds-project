@@ -164,18 +164,21 @@ const TrainSchedules = () => {
               <Table>
                 <TableHead>
                   <TableRow>
+                    <TableCell>Transit Line</TableCell>
                     <TableCell>Train Name</TableCell>
                     <TableCell>Train Type</TableCell>
                     <TableCell>Origin</TableCell>
                     <TableCell>Destination</TableCell>
                     <TableCell>Departure</TableCell>
                     <TableCell>Arrival</TableCell>
+                    <TableCell>Fare</TableCell>
                     <TableCell>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {trainSchedules.map((schedule) => (
                     <TableRow key={schedule.transit_line}>
+                      <TableCell>{schedule.transit_line}</TableCell>
                       <TableCell>{schedule.train_name}</TableCell>
                       <TableCell>{schedule.train_type}</TableCell>
                       <TableCell>{schedule.origin}</TableCell>

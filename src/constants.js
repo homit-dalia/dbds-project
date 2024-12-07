@@ -23,4 +23,5 @@ export const apiEndpoints = {
     getQueries: apiServer + "/employee/fetch/queries",
     answerQuery: apiServer + "/employee/answer/queries",
     createQuery: apiServer + "/employee/create/queries",
+    deleteTrainSchedule: apiServer + "/employee/delete/trainschedule",
 };
