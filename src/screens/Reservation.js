@@ -125,14 +125,17 @@ const Reservations = () => {
                                     {reservationsList.map((reservation) => (
                                         <ListItem key={reservation.reservation_id} sx={{ mb: 2 }}>
                                             <ListItemText
-                                                primary={`Seat: ${reservation.seat_number || 'Unassigned'}, Passenger Category: ${reservation.passenger_category}`}
+                                                primary={`From: ${reservation.schedule.origin_name} To: ${reservation.schedule.destination_name}`}
                                                 secondary={
-                                                    <Box display="flex" alignItems="center" gap={2}>
+                                                    <>
+                                                        <Typography variant="body2">
+                                                            Seat: {reservation.seat_number || 'Unassigned'}, Passenger Category: {reservation.passenger_category}
+                                                        </Typography>
                                                         <Typography variant="body2" sx={{ color: reservation.status === 'active' ? 'green' : 'red' }}>
                                                             {reservation.status === 'active' ? 'Confirmed' : 'Cancelled'}
                                                         </Typography>
                                                         <Typography variant="body2">Fare: ${reservation.discounted_price}</Typography>
-                                                    </Box>
+                                                    </>
                                                 }
                                             />
                                             {currentTab == 0 && reservation.status === 'active' && (

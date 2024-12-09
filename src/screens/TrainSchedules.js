@@ -71,6 +71,7 @@ const TrainSchedules = () => {
       if (data.success) {
         setReservations(data.customers);
       } else {
+        setReservations([]);
         alert(data.message || 'Failed to fetch reservations.');
       }
     } catch (error) {

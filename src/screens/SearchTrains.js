@@ -36,10 +36,10 @@ const SearchTrains = () => {
     const [passengerCategory, setPassengerCategory] = useState('regular');
     const [isRoundTripBooking, setIsRoundTripBooking] = useState(false);
 
-    useEffect(() => {
-        if (origin && destination)
-            handleSearch();
-    }, [origin, destination, dateOfTravel]);
+    // useEffect(() => {
+    //     if (origin && destination)
+    //         handleSearch();
+    // }, [origin, destination, dateOfTravel]);
 
     const handleSearch = async () => {
         const requestBody = { source: origin, destination: destination, date: dateOfTravel };
@@ -98,7 +98,10 @@ const SearchTrains = () => {
                 customer_email: user.info.email,
                 price: selectedSchedule.final_fare,
                 passenger_category: passengerCategory,
+                source_station_id: selectedSchedule.origin_id,
+                destination_station_id: selectedSchedule.destination_id,
             };
+            console.log(requestBody);
             const response = await fetch(apiEndpoints.reserveTicket, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -202,15 +205,19 @@ const SearchTrains = () => {
                                         {schedule.origin_name} to {schedule.destination_name}
                                     </Typography>
                                     <Typography variant="h6" color="secondary">
-                                        Fare: ${schedule.final_fare}
+                                        Fare: ${schedule.final_fare.toFixed(2)}
                                     </Typography>
                                 </Box>
                                 <Box display="flex" justifyContent="space-between" mt={2}>
-                                    <Typography variant="body1">Departure: <strong>{new Date(schedule.departure).toLocaleString()}</strong></Typography>
-                                    <Typography variant="body1">Arrival: <strong>{new Date(schedule.arrival).toLocaleString()}</strong></Typography>
+                                    <Typography variant="body1">
+                                        Departure: <strong>{new Date(new Date(schedule.departure_time_final).getTime() + 5 * 3600000).toLocaleString()}</strong>
+                                    </Typography>
+                                    <Typography variant="body1">
+                                        Arrival: <strong>{new Date(new Date(schedule.arrival_time_final).getTime() + 5 * 3600000).toLocaleString()}</strong>
+                                    </Typography>
                                 </Box>
                                 <Typography variant="body2" mt={2} color="textSecondary">
-                                    Total Journey Duration: <strong>{`${Math.floor((new Date(schedule.arrival) - new Date(schedule.departure)) / 3600000)} hrs ${Math.ceil(((new Date(schedule.arrival) - new Date(schedule.departure)) % 3600000) / 60000)} mins`}</strong>
+                                    Total Journey Duration: <strong>{`${Math.floor((new Date(schedule.arrival_time_final) - new Date(schedule.departure_time_final)) / 3600000)} hrs ${Math.ceil(((new Date(schedule.arrival_time_final) - new Date(schedule.departure_time_final)) % 3600000) / 60000)} mins`}</strong>
                                 </Typography>
                                 <Button
                                     variant="contained"
@@ -228,7 +235,7 @@ const SearchTrains = () => {
                                                 <Box width={24} height={24} borderRadius="50%" bgcolor="success.main" display="flex" alignItems="center" justifyContent="center" position="relative" top="-12px">
                                                     <Typography variant="caption" color="white">S</Typography>
                                                 </Box>
-                                                <Typography variant="caption" mt={1}>{schedule.origin_name}</Typography>
+                                                <Typography variant="caption" mt={1}>{schedule.transit_origin_name}</Typography>
                                             </Box>
                                             {stops[schedule.transit_line]?.map((stop, index) => (
                                                 <Box key={index} textAlign="center" flexGrow={1} position="relative" mx={2} display="flex" flexDirection="column" alignItems="center">
@@ -242,7 +249,7 @@ const SearchTrains = () => {
                                                 <Box width={24} height={24} borderRadius="50%" bgcolor="error.main" display="flex" alignItems="center" justifyContent="center" position="relative" top="-12px">
                                                     <Typography variant="caption" color="white">D</Typography>
                                                 </Box>
-                                                <Typography variant="caption" mt={1}>{schedule.destination_name}</Typography>
+                                                <Typography variant="caption" mt={1}>{schedule.transit_destination_name}</Typography>
                                             </Box>
                                         </Box>
 
@@ -276,7 +283,7 @@ const SearchTrains = () => {
                 <DialogContent>
                     <Typography>
                         Fare: $
-                        {selectedSchedule?.fare &&
+                        {selectedSchedule?.final_fare &&
                             (() => {
                                 const baseFare = selectedSchedule.final_fare;
                                 const discountRates = {
