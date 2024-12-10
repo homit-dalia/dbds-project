@@ -61,7 +61,8 @@ const SearchReservations = () => {
             if (data.success) {
                 setRevenueData(data.data);
             } else {
-                alert(data.message || 'No revenue data found.');
+                fetchRevenue(type);
+                // alert(data.message || 'No revenue data found.');
             }
         } catch (error) {
             console.error('Error fetching revenue data:', error);
@@ -95,12 +96,14 @@ const SearchReservations = () => {
             if (data.success) {
                 setReservations(data.reservations);
             } else {
-                alert(data.message || 'No reservations found.');
+                // alert(data.message || 'No reservations found.');
+                handleSearch();
             }
         } catch (error) {
             console.error('Error fetching reservations:', error);
-            alert('Failed to fetch reservations. Please try again.');
+            // alert('Failed to fetch reservations. Please try again.');
         } finally {
+            setIsSearchPressed(false);
             setLoading(false);
         }
     };
@@ -119,11 +122,13 @@ const SearchReservations = () => {
             if (data.success) {
                 setMetadata(data);
             } else {
-                alert(data.message || 'Failed to fetch metadata.');
+                fetchMetadata();
+                // alert(data.message || 'Failed to fetch metadata.');
             }
         } catch (error) {
+            fetchMetadata();
             console.error('Error fetching metadata:', error);
-            alert('Failed to fetch metadata. Please try again.');
+            // alert('Failed to fetch metadata. Please try again.');
         } finally {
             setLoadingMetadata(false);
         }
@@ -216,7 +221,7 @@ const SearchReservations = () => {
 
                         {/* No Results */}
                         {!loading && reservations.length === 0 && searchValue && isSearchPressed && (
-                            <Typography>No reservations found for the given {searchType}.</Typography>
+                            <Typography>No reservations found for the given {searchType === 'transit_line' ? 'transit line' : 'customer email'}.</Typography>
                         )}
                     </Box>
                 </Box>

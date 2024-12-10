@@ -56,6 +56,7 @@ const ManageRepresentatives = () => {
         setRepresentatives(data.reps);
       }
     } catch (error) {
+      fetchRepresentatives();
       console.error('Error fetching representatives:', error);
     }
   };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Typography,
     Container,
@@ -21,12 +21,22 @@ import { apiEndpoints } from '../constants';
 const Reservations = () => {
     const { user } = useUserContext();
     const [reservations, setReservations] = useState({ upcoming: {}, past: {} });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [expandedTransitLine, setExpandedTransitLine] = useState(null);
     const [currentTab, setCurrentTab] = useState(0);
 
+    const fetchCalled = useRef(false);
+
+    useEffect(() => {
+        if (!fetchCalled.current) {
+            fetchCalled.current = true;
+            fetchReservations();
+        }
+    }, []);
+
     const fetchReservations = async () => {
         try {
+            console.log('Fetching reservations...');
             setLoading(true);
             const response = await fetch(apiEndpoints.fetchReservations, {
                 method: 'POST',
@@ -94,10 +104,6 @@ const Reservations = () => {
     const handleTabChange = (event, newValue) => {
         setCurrentTab(newValue);
     };
-
-    useEffect(() => {
-        fetchReservations();
-    }, []);
 
     const renderReservations = (reservationsGroup) => (
         <Box mt={2}>

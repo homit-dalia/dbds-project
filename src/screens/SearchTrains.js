@@ -71,6 +71,7 @@ const SearchTrains = () => {
     const handleSwapLocations = () => {
         setOrigin(destination);
         setDestination(origin);
+        handleSearch();
     };
 
     const handleViewStops = async (transitLine) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -20,7 +20,7 @@ import { useUserContext } from "../App";
 const Queries = () => {
 
   const { user } = useUserContext();
-  
+
   const [queries, setQueries] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,8 +28,30 @@ const Queries = () => {
   const [newQuery, setNewQuery] = useState(""); // State for new query input
   const [answer, setAnswer] = useState(""); // State for answering queries
 
+  const fetchInitial = useRef(true);
+
+  useEffect(() => {
+    if (fetchInitial.current) {
+      fetchInitial.current = false;
+      fetchQueries();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (searchValue === "")
+      fetchQueries();
+  }, [searchValue]);
+
   const fetchQueries = async (isSearch = false) => {
+    console.log("Fetching queries...");
     setLoading(true);
+
+    const requestBody = isSearch ? { keyword: searchValue } : { keyword: "" };
+
+    if (!(user.info.type === "customer_rep")) {
+      requestBody.limit = 5;
+    }
+
     try {
       const response = await fetch(apiEndpoints.getQueries, {
         method: "POST",
@@ -42,7 +64,7 @@ const Queries = () => {
         setQueries(data.queries);
       } else {
         setQueries([]);
-        alert(data.message || "No queries found.");
+        fetchQueries();
       }
     } catch (error) {
       console.error("Error fetching queries:", error);
@@ -57,6 +79,7 @@ const Queries = () => {
   };
 
   const handleCreateQuery = async () => {
+    console.log("Creating query...");
     if (!newQuery.trim()) return alert("Enter a valid query.");
     setLoading(true);
     try {
@@ -81,6 +104,7 @@ const Queries = () => {
   };
 
   const handleAnswerQuery = async (queryId) => {
+    console.log("Answering query...");
     if (!answer.trim()) return alert("Enter a valid response.");
     setLoading(true);
     try {
@@ -107,10 +131,6 @@ const Queries = () => {
   const toggleExpand = (index) => {
     setExpanded(expanded === index ? null : index);
   };
-
-  useEffect(() => {
-    fetchQueries(); // Fetch top queries on component load
-  }, []);
 
   return (
     <Box>
